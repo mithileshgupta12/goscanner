@@ -9,6 +9,25 @@ import (
 	"time"
 )
 
+type Flags struct {
+	IP        string
+	StartPort int
+	EndPort   int
+}
+
+func parseFlags() *Flags {
+	ip := flag.String("ip", "127.0.0.1", "IP address to scan")
+	startPort := flag.Int("startPort", 1, "Start port")
+	endPort := flag.Int("endPort", 1024, "End port")
+	flag.Parse()
+
+	return &Flags{
+		IP:        *ip,
+		StartPort: *startPort,
+		EndPort:   *endPort,
+	}
+}
+
 func scan(ip string, port int) {
 	address := net.JoinHostPort(ip, fmt.Sprintf("%d", port))
 	conn, err := net.DialTimeout("tcp", address, time.Second)
@@ -21,18 +40,13 @@ func scan(ip string, port int) {
 }
 
 func main() {
-	ip := flag.String("ip", "127.0.0.1", "IP address to scan")
-	startPort := flag.Int("startPort", 1, "Start port")
-	endPort := flag.Int("endPort", 1024, "End port")
-	flag.Parse()
+	flags := parseFlags()
 
 	wg := &sync.WaitGroup{}
-
-	for i := *startPort; i <= *endPort; i++ {
+	for i := flags.StartPort; i <= flags.EndPort; i++ {
 		wg.Go(func() {
-			scan(*ip, i)
+			scan(flags.IP, i)
 		})
 	}
-
 	wg.Wait()
 }
