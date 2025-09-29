@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -20,11 +21,16 @@ func scan(ip string, port int) {
 }
 
 func main() {
+	ip := flag.String("ip", "127.0.0.1", "IP address to scan")
+	startPort := flag.Int("startPort", 1, "Start port")
+	endPort := flag.Int("endPort", 1024, "End port")
+	flag.Parse()
+
 	wg := &sync.WaitGroup{}
 
-	for i := 1; i <= 1024; i++ {
+	for i := *startPort; i <= *endPort; i++ {
 		wg.Go(func() {
-			scan("127.0.0.1", i)
+			scan(*ip, i)
 		})
 	}
 
